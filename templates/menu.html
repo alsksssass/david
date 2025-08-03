@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>이미지 예제</title>
+</head>
+<body>
+	{% if page_type == 'image' %}
+    	<h1>Flask 이미지 예제</h1>
+    	<p>고양이</p>
+    	<img src="{{ url_for('static', filename='images/cat.png') }}" alt="고양이" width="400">
+	{% elif page_type == 'menu' %}
+		<center>
+		메뉴판<p>
+		<button name="menu1" style="width:70pt;">아메리카노</button><br>
+		<button name="menu2" style="width:70pt;">카페라떼</button><br>
+		</p><hr>
+		<button name="menu3" style="width:70pt;">녹차</button>
+	{% endif %}
+</body>
+</html>
