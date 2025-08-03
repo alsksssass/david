@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>이미지 예제</title>
+</head>
+<body>
+    <h1>Flask 이미지 예제</h1>
+    <p>고양이</p>
+    <img src="{{ url_for('static', filename='images/cat.png') }}" alt="고양이" width="400">
+</body>
+</html>
