@@ -18,5 +18,9 @@ def render_example():
 def render_menu():
     return render_template('menu.html', page_type='menu')
 
+@app.route("/test2")
+def test2():
+    return render_template('test2.html')
+
 if __name__ == '__main__':
     app.run("0.0.0.0", port=80,debug=True)
