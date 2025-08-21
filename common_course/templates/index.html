@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>이미지 예제</title>
+</head>
+<body>
+	 {{ computername }}<p>
+	{% if page_type == 'image' %}
+    	<h1>Flask 이미지 예제</h1>
+    	<p>고양이</p>
+    	<img src="{{ url_for('static', filename='images/david.jpg') }}" alt="고양이" width="400">
+	{% elif page_type == 'menu' %}
+		<center>
+		메뉴판<p>
+		<button name="menu1">아메리카노</button><br>
+		<button name="menu2">카페라떼</button><br>
+		<button name="menu3">녹차라떼</button><br>
+		<button name="menu3">둥글레차</button><br>
+		<button name="menu3">유자차</button><br>
+		<button name="menu4" style="width:70pt;">녹차</button>
+		<hr>
+	{% endif %}
+</body>
+</html>
