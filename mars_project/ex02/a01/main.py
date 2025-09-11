@@ -35,9 +35,5 @@ def main():
         print(e)
 
 
-def sort_by_flammabliity(data, index):
-    return float(data[-1]) >= index
-
-
 if __name__ == "__main__":
     main()

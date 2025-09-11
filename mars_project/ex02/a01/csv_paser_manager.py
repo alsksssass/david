@@ -32,9 +32,6 @@ class Csv_manager:
     def get_csv_header(self):
         return self.csv_header.copy()
 
-    # def get_csv_filter(self, filter, index):
-    #     return [row for row in self.csv_data if filter(row, index)]
-
     def get_csv_filter(self, data, index, operator=None):
         data_index = self.csv_header.index(data)
         if data_index == None:
