@@ -8,7 +8,7 @@ import zlib
 class Decrypt:
     def __init__(self):
         self.base_path = os.path.dirname(os.path.abspath(__file__))
-        self.passwd_seed = b"abcdefghijklmnopqrstuvwxyz0123456789"
+        self.passwd_seed = "abcdefghijklmnopqrstuvwxyz0123456789"
         self.found_passwd = ""
         self.passwd_len = 6
         self.start_time = time.time()
@@ -48,35 +48,24 @@ class Decrypt:
         zip_file_path = os.path.join(self.base_path, "emergency_storage_key.zip")
         with zipfile.ZipFile(zip_file_path, "r") as zf:
             member = self.pick_member(zf)
-            seed = self.passwd_seed
-            a36 = len(seed)
-            for i0 in range(a36):
-                c0 = seed[i0]
-                for i1 in range(a36):
-                    c1 = seed[i1]
-                    for i2 in range(a36):
-                        c2 = seed[i2]
-                        for i3 in range(a36):
-                            c3 = seed[i3]
-                            for i4 in range(a36):
-                                c4 = seed[i4]
-                                for i5 in range(a36):
-                                    c5 = seed[i5]
-                                    passwd_bytes = bytes((c0, c1, c2, c3, c4, c5))
-                                    # print(passwd_bytes.decode("utf-8"))
+            for i in range(36):
+                for j in range(36):
+                    for k in range(36):
+                        for l in range(36):
+                            for m in range(36):
+                                for n in range(36):
+                                    passwd = self.get_passwd(i, j, k, l, m, n)
                                     try:
                                         self.counter += 1
                                         with zf.open(
                                             member,
                                             "r",
-                                            pwd=passwd_bytes,
+                                            pwd=passwd.encode("utf-8"),
                                         ) as f:
                                             byte = f.read(1)
                                             self.print_info()
-                                            self.found_passwd = passwd_bytes.decode(
-                                                "utf-8"
-                                            )
-                                            return self.found_passwd
+                                            self.found_passwd = passwd
+                                            return passwd
                                     except (
                                         RuntimeError,
                                         zipfile.BadZipFile,
