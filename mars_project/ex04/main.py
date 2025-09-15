@@ -1,12 +1,9 @@
-import os
-import sys
-import time
-import decrypto
+import david.mars_project.ex04.door_hacking as door_hacking
 
 
 def main():
-    dc = decrypto.Decrypt()
-    passwd = dc.do_brutforce()
+    dc = door_hacking.Decrypt()
+    passwd = dc.unlock_zip()
     print(f"pass word is {passwd}")
     dc.save_password()
 

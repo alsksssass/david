@@ -37,14 +37,14 @@ class Decrypt:
         raise ValueError("Error : ther is no file in zip!")
 
     def save_password(self):
-        saved_path = os.path.join(self.base_path, "passwd.txt")
+        saved_path = os.path.join(self.base_path, "password.txt")
         try:
             with open(saved_path, "w", encoding="utf-8") as f:
                 f.write(self.found_passwd)
         except Exception as e:
             print(f"error : {e}")
 
-    def do_brutforce(self) -> str:
+    def unlock_zip(self) -> str:
         zip_file_path = os.path.join(self.base_path, "emergency_storage_key.zip")
         with zipfile.ZipFile(zip_file_path, "r") as zf:
             member = self.pick_member(zf)
