@@ -9,7 +9,7 @@ import mmap
 
 class Decrypt:
     def __init__(self):
-        self.cpu_cores = os.cpu_count() or 6
+        self.cpu_cores = 4 or os.cpu_count() or 6
         self.base_path = os.path.dirname(os.path.abspath(__file__))
         self.passwd_seed = b"abcdefghijklmnopqrstuvwxyz0123456789"
         self.base = len(self.passwd_seed)
@@ -91,6 +91,8 @@ class Decrypt:
                                 print(f"password founded ! : {password}")
                                 event.set()
                                 return passwd
+                        except KeyboardInterrupt:
+                            break
                         except (
                             RuntimeError,
                             zipfile.BadZipFile,
@@ -114,12 +116,17 @@ class Decrypt:
             )
             for i in range(self.cpu_cores)
         ]
-
-        for p in process:
-            p.start()
-        for p in process:
-            p.join()
-        for p in process:
-            if p.is_alive():
-                p.terminate()
+        try:
+            for p in process:
+                p.start()
+            for p in process:
                 p.join()
+            for p in process:
+                if p.is_alive():
+                    p.terminate()
+                    p.join()
+        except KeyboardInterrupt:
+            for p in process:
+                if p.is_alive():
+                    p.terminate()
+                    p.join()

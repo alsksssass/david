@@ -2,9 +2,9 @@ import MissionComputer
 import threading
 import multiprocessing
 
-is_multiprocess = True
+# is_multiprocess = True
 
-# is_multiprocess = False
+is_multiprocess = False
 
 
 def main():

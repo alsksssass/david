@@ -1,4 +1,4 @@
-import david.mars_project.ex04.door_hacking as door_hacking
+import door_hacking as door_hacking
 
 
 def main():
