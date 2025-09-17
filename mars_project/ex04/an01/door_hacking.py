@@ -9,7 +9,7 @@ import mmap
 
 class Decrypt:
     def __init__(self):
-        self.cpu_cores = 4 or os.cpu_count() or 6
+        self.cpu_cores = os.cpu_count()
         self.base_path = os.path.dirname(os.path.abspath(__file__))
         self.passwd_seed = b"abcdefghijklmnopqrstuvwxyz0123456789"
         self.base = len(self.passwd_seed)
@@ -19,6 +19,8 @@ class Decrypt:
         self.show_info_per_count = 100000
         self.counter = 0
         self.max_try_count = self.base**self.passwd_len
+        if os.uname().sysname == "Darwin":
+            self.cpu_cores = round(self.cpu_cores / 2)
 
     def range_for_worker(self, worker_id, num_workers) -> tuple[int, int]:
         base = self.max_try_count // num_workers
@@ -38,15 +40,19 @@ class Decrypt:
             out[pos] = self.passwd_seed[left]
         return bytes(out)
 
-    def get_elapsed(self) -> str:
+    def get_elapsed(self, count=0, max_try=None) -> str:
         now = time.time()
         elapsed = now - self.start_time
-        return f"{elapsed:.3f} 초 경과"
+        if max_try is None or count <= 0:
+            return f"{elapsed:.3f} 초 경과, 예상시간 알수없음, 남은시간 알수없음"
+        total_time = (elapsed / count) * max_try
+        eta = max(total_time - elapsed, 0)
+        return f"경과시간 {elapsed:.3f}초, 남은시간 {eta:.3f}초 , 예상시간 {total_time:.3f}초"
 
-    def print_info(self, count, max_try):
+    def print_info(self, idx, count, max_try):
         if count % self.show_info_per_count == 0:
             print(
-                f'시작 시간 {datetime.fromtimestamp(self.start_time).strftime("%Y-%m-%d %H:%M:%S")} 시도횟수 {count} 경과시간 {self.get_elapsed()} 퍼센티지 {(count / max_try) * 100 : .3f}%'
+                f'프로세스 No. {idx} - 시작 시간 {datetime.fromtimestamp(self.start_time).strftime("%Y-%m-%d %H:%M:%S")} 시도횟수 {count}/{max_try}  퍼센티지 {(count / max_try) * 100 : .3f}%  {self.get_elapsed(count,max_try)}'
             )
 
     def pick_member(self, zf: zipfile.ZipFile):
@@ -85,7 +91,7 @@ class Decrypt:
                                 pwd=passwd,
                             ) as f:
                                 byte = f.read(1)
-                                self.print_info(i - start, max_try)
+                                self.print_info(idx, i - start, max_try)
                                 password = passwd.decode(encoding="utf-8")
                                 self.save_password(password)
                                 print(f"password founded ! : {password}")
@@ -99,7 +105,7 @@ class Decrypt:
                             zipfile.LargeZipFile,
                             zlib.error,
                         ):
-                            self.print_info(i - start, max_try)
+                            self.print_info(idx, i - start, max_try)
                             continue
         return "can't found passwd"
 

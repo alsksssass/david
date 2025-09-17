@@ -2,9 +2,9 @@ import MissionComputer
 import threading
 import multiprocessing
 
-# is_multiprocess = True
+is_multiprocess = True
 
-is_multiprocess = False
+# is_multiprocess = False
 
 
 def main():
@@ -26,12 +26,15 @@ def main():
         ]
         try:
             for p in process:
+                p.daemon = True
                 p.start()
             for p in process:
                 p.join()
         except KeyboardInterrupt:
             print("\ncomputer shutdown")
             for p in process:
+                if p.is_alive():
+                    p.terminate()
                 p.join()
         except Exception as e:
             print(f"error : {e}")
@@ -47,6 +50,7 @@ def main():
         ]
         try:
             for t in threads:
+                t.daemon = True
                 t.start()
             for t in threads:
                 t.join()
