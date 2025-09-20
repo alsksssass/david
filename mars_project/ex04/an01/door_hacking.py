@@ -119,6 +119,7 @@ class Decrypt:
                     self.cpu_cores,
                     event,
                 ),
+                daemon=True,
             )
             for i in range(self.cpu_cores)
         ]
