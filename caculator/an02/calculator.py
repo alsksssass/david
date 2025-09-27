@@ -166,7 +166,10 @@ class Calculator(QMainWindow):
                 value = float(self.input)
             else:
                 value = int(self.input)
-            self.expression.append(str(value))
+            sign = "-" if self.is_input_nagative else ""
+            value = sign + str(value)
+            self.expression.append(value)
+            self.is_input_nagative = False
             self.input = ""
 
     def count_persent(self, express: str):
@@ -176,6 +179,121 @@ class Calculator(QMainWindow):
             temp = temp[:-1]
             count += 1
         return count
+
+    def tokenize(self, expression: str):
+        """수학식 문자열을 토큰으로 분리"""
+        tokens = []
+        i = 0
+        while i < len(expression):
+            if expression[i].isspace():
+                i += 1
+                continue
+
+            # 숫자 토큰 (정수 및 소수)
+            if expression[i].isdigit() or expression[i] == ".":
+                num = ""
+                while i < len(expression) and (
+                    expression[i].isdigit() or expression[i] == "."
+                ):
+                    num += expression[i]
+                    i += 1
+                tokens.append(float(num) if "." in num else int(num))
+
+            # 음수 처리
+            elif expression[i] == "-" and (i == 0 or expression[i - 1] in "(+*/"):
+                num = "-"
+                i += 1
+                while i < len(expression) and (
+                    expression[i].isdigit() or expression[i] == "."
+                ):
+                    num += expression[i]
+                    i += 1
+                tokens.append(float(num) if "." in num else int(num))
+
+            # 괄호와 연산자
+            elif expression[i] in "()+-*/":
+                tokens.append(expression[i])
+                i += 1
+            else:
+                i += 1
+
+        return tokens
+
+    def infix_to_postfix(self, tokens):
+        """중위표기법을 후위표기법으로 변환 (Shunting Yard Algorithm)"""
+        precedence = {"+": 1, "-": 1, "*": 2, "/": 2}
+        output = []
+        operator_stack = []
+
+        for token in tokens:
+            if isinstance(token, (int, float)):
+                output.append(token)
+            elif token == "(":
+                operator_stack.append(token)
+            elif token == ")":
+                while operator_stack and operator_stack[-1] != "(":
+                    output.append(operator_stack.pop())
+                if operator_stack:
+                    operator_stack.pop()  # '(' 제거
+            elif token in precedence:
+                while (
+                    operator_stack
+                    and operator_stack[-1] != "("
+                    and operator_stack[-1] in precedence
+                    and precedence[operator_stack[-1]] >= precedence[token]
+                ):
+                    output.append(operator_stack.pop())
+                operator_stack.append(token)
+
+        while operator_stack:
+            output.append(operator_stack.pop())
+
+        return output
+
+    def evaluate_postfix(self, postfix):
+        """후위표기법 수식 계산"""
+        stack = []
+
+        for token in postfix:
+            if isinstance(token, (int, float)):
+                stack.append(token)
+            elif token in "+-*/":
+                if len(stack) < 2:
+                    raise ValueError("잘못된 수식입니다")
+
+                b = stack.pop()
+                a = stack.pop()
+
+                if token == "+":
+                    result = a + b
+                elif token == "-":
+                    result = a - b
+                elif token == "*":
+                    result = a * b
+                elif token == "/":
+                    if b == 0:
+                        raise ZeroDivisionError("0으로 나눌 수 없습니다")
+                    result = a / b
+
+                stack.append(result)
+
+        if len(stack) != 1:
+            raise ValueError("잘못된 수식입니다")
+
+        return stack[0]
+
+    def safe_calculate(self, expression: str):
+        """eval() 대신 안전한 수학식 계산"""
+        try:
+            tokens = self.tokenize(expression)
+            if not tokens:
+                return 0
+
+            postfix = self.infix_to_postfix(tokens)
+            result = self.evaluate_postfix(postfix)
+            return result
+        except (ValueError, ZeroDivisionError):
+            return 0
 
     def process(self):
         print(f"1process input if = {self.input}")
@@ -195,7 +313,7 @@ class Calculator(QMainWindow):
             expression = expression[:-count] + f"/100{count * "0"}"
             print(expression)
         try:
-            answer = round(eval(expression), 6)
+            answer = round(self.safe_calculate(expression), 6)
             print(f"answer = {answer}")
         except ZeroDivisionError:
             answer = 0
@@ -299,6 +417,7 @@ class Calculator(QMainWindow):
             print(self.expression)
             self.process()
         self.update_display()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

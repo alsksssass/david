@@ -21,6 +21,8 @@ def get_next_ascii(char):
     next_number = ord(char)
     if next_number == ord("z"):
         next_number = ord("a")
+    elif next_number == ord("Z"):
+        next_number = ord("A")
     else:
         next_number += 1
     return chr(next_number)
