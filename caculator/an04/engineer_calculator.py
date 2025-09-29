@@ -14,6 +14,11 @@ from calculator import Calculator
 
 
 class EngineerCalculator(Calculator):
+    # 엔지니어 계산기 전용 폰트 크기 클래스 변수
+    ENGINEER_DISPLAY_FONT_SIZE = 30
+    ENGINEER_BUTTON_FONT_SIZE = 28
+    ENGINEER_FUNCTION_BUTTON_FONT_SIZE = 16
+
     def __init__(self):
         self.angle_mode = "Rad"  # Rad, Deg
         self.memory_value = 0
@@ -51,8 +56,8 @@ class EngineerCalculator(Calculator):
         self.display.setMinimumHeight(160)
         self.display.setWordWrap(False)  # 텍스트 줄바꿈 방지
 
-        # 초기 폰트 설정 - 기본 10으로 설정
-        initial_font = QFont("SF Pro Display", 15)
+        # 초기 폰트 설정 - 클래스 변수 사용
+        initial_font = QFont("SF Pro Display", self.ENGINEER_DISPLAY_FONT_SIZE)
         initial_font.setWeight(200)
         self.display.setFont(initial_font)
 
@@ -94,10 +99,10 @@ class EngineerCalculator(Calculator):
                 # 버튼 스타일 설정
                 button.setStyleSheet(self.get_ios_button_style(button_type))
 
-                # 폰트 설정 (버튼 크기에 맞게 조정)
-                font = QFont("SF Pro Display", 28)
+                # 폰트 설정 (클래스 변수 사용)
+                font = QFont("SF Pro Display", self.ENGINEER_BUTTON_FONT_SIZE)
                 if button_type == "function":
-                    font.setPointSize(16)  # 기능 버튼은 더 작은 폰트
+                    font.setPointSize(self.ENGINEER_FUNCTION_BUTTON_FONT_SIZE)
                 button.setFont(font)
 
                 # 버튼 클릭 이벤트 연결
@@ -166,7 +171,7 @@ class EngineerCalculator(Calculator):
                 {"text": "⌫", "type": "clear", "colspan": 2},
                 None,
                 {"text": "AC", "type": "clear"},
-                {"text": "%", "type": "clear"},
+                {"text": "%", "type": "operator"},
                 {"text": "÷", "type": "operator"},
             ],
             # 7행: 숫자 7,8,9와 곱셈
@@ -365,6 +370,8 @@ class EngineerCalculator(Calculator):
             super().button_clicked("-")
         elif button_text == "+/−":
             super().button_clicked("+/-")
+        elif button_text == "%":
+            super().button_clicked("%")
 
         # 괄호
         elif button_text == "(":
@@ -500,9 +507,11 @@ class EngineerCalculator(Calculator):
             self.expression.append(")")
 
     def calculate_optimal_font_size(
-        self, text, max_width=380, max_font_size=10, min_font_size=8
+        self, text, max_width=380, max_font_size=None, min_font_size=8
     ):
-        """텍스트 너비에 맞는 최적 폰트 크기 계산 - 기본 10, 최소 8"""
+        """텍스트 너비에 맞는 최적 폰트 크기 계산 - 클래스 변수 기본값 사용"""
+        if max_font_size is None:
+            max_font_size = self.ENGINEER_DISPLAY_FONT_SIZE
         font = QFont("SF Pro Display", max_font_size)
         font.setWeight(200)
 
@@ -525,9 +534,21 @@ class EngineerCalculator(Calculator):
         if text == "Error":
             return "Error"
 
+        # 입력 중인 소수점 유지 (마지막 문자가 '.'인 경우)
+        if text.endswith('.') and self.input.endswith('.'):
+            return text
+
         # 텍스트가 순수한 숫자 결과인지 확인하고 반올림 적용
         if self.is_numeric_result(text):
             try:
+                # 입력 중인 소수의 경우 원본 유지
+                if self.input and '.' in self.input and not any(op in text for op in "+-*/()"):
+                    return text
+
+                # 계산 완료 상태에서 간단한 정수는 그대로 표시
+                if self.input == "" and text.isdigit() and len(text) <= 2:
+                    return text
+
                 num = float(text)
                 return self.smart_number_format(num)
             except (ValueError, OverflowError):
@@ -546,7 +567,7 @@ class EngineerCalculator(Calculator):
         text_chars = set(text.lower())
 
         # 연산자가 포함되어 있으면 수식으로 판단
-        operators = set("*/()√²³ˣʸπ")
+        operators = set("*/%()√²³ˣʸπ")
         if any(op in text for op in operators):
             return False
 
@@ -599,7 +620,7 @@ class EngineerCalculator(Calculator):
                     self.expression = self.expression[1:]
                 base = "".join(str(x) for x in self.expression)
 
-            input_txt = self.input if self.input != "" else "0"
+            input_txt = self.input
             if self.is_input_nagative and self.input != "":
                 input_txt = "(-" + self.input + ")"
 
@@ -610,8 +631,8 @@ class EngineerCalculator(Calculator):
             # 텍스트 포맷팅 (숫자인 경우 반올림)
             formatted_text = self.format_display_text(display_text)
 
-            # 폰트 크기는 항상 10으로 고정
-            font = QFont("SF Pro Display", 10)
+            # 클래스 변수로 정의된 폰트 크기 사용
+            font = QFont("SF Pro Display", self.ENGINEER_DISPLAY_FONT_SIZE)
             font.setWeight(200)
             self.display.setFont(font)
             self.display.setText(formatted_text)

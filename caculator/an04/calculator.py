@@ -13,10 +13,14 @@ from PyQt6.QtGui import QFont
 
 
 class Calculator(QMainWindow):
+    # 폰트 크기 클래스 변수 정의
+    DISPLAY_FONT_SIZE = 60
+    BUTTON_FONT_SIZE = 24
+
     def __init__(self):
         super().__init__()
         self.expression = []
-        self.input = "0"
+        self.input = ""
         self.is_input_nagative = False
         self.operator = ["/", "*", "-", "+", "="]
         self.operator_method = {
@@ -44,19 +48,19 @@ class Calculator(QMainWindow):
         main_layout.setContentsMargins(20, 20, 20, 20)
 
         # 디스플레이 영역 설정
-        self.display = QLabel(self.input)
+        self.display = QLabel("0")
         self.display.setAlignment(
             Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
         )
         self.display.setStyleSheet(
-            """
-            QLabel {
+            f"""
+            QLabel {{
                 color: #FFFFFF;
                 background-color: transparent;
                 padding: 20px;
-                font-size: 60px;
+                font-size: {self.DISPLAY_FONT_SIZE}px;
                 font-weight: 300;
-            }
+            }}
         """
         )
         self.display.setMinimumHeight(120)
@@ -90,7 +94,7 @@ class Calculator(QMainWindow):
 
                 # 폰트 설정
                 font = QFont()
-                font.setPointSize(24)
+                font.setPointSize(self.BUTTON_FONT_SIZE)
                 font.setWeight(QFont.Weight.Normal)
                 button.setFont(font)
 
@@ -190,25 +194,28 @@ class Calculator(QMainWindow):
                 continue
 
             # 숫자 토큰 (정수 및 소수)
-            if expression[i].isdigit() or expression[i] == '.':
-                num = ''
-                while i < len(expression) and (expression[i].isdigit() or expression[i] == '.'):
+            if expression[i].isdigit() or expression[i] == ".":
+                num = ""
+                while i < len(expression) and (
+                    expression[i].isdigit() or expression[i] == "."
+                ):
                     num += expression[i]
                     i += 1
-                tokens.append(float(num) if '.' in num else int(num))
+                tokens.append(float(num) if "." in num else int(num))
 
             # 음수 처리
-            elif expression[i] == '-' and (
-                i == 0 or expression[i-1] in '(+*/'):
-                num = '-'
+            elif expression[i] == "-" and (i == 0 or expression[i - 1] in "(+*/"):
+                num = "-"
                 i += 1
-                while i < len(expression) and (expression[i].isdigit() or expression[i] == '.'):
+                while i < len(expression) and (
+                    expression[i].isdigit() or expression[i] == "."
+                ):
                     num += expression[i]
                     i += 1
-                tokens.append(float(num) if '.' in num else int(num))
+                tokens.append(float(num) if "." in num else int(num))
 
             # 괄호와 연산자
-            elif expression[i] in '()+-*/':
+            elif expression[i] in "()+-*/%":
                 tokens.append(expression[i])
                 i += 1
             else:
@@ -218,25 +225,27 @@ class Calculator(QMainWindow):
 
     def infix_to_postfix(self, tokens):
         """중위표기법을 후위표기법으로 변환 (Shunting Yard Algorithm)"""
-        precedence = {'+': 1, '-': 1, '*': 2, '/': 2}
+        precedence = {"+": 1, "-": 1, "*": 2, "/": 2, "%": 2}
         output = []
         operator_stack = []
 
         for token in tokens:
             if isinstance(token, (int, float)):
                 output.append(token)
-            elif token == '(':
+            elif token == "(":
                 operator_stack.append(token)
-            elif token == ')':
-                while operator_stack and operator_stack[-1] != '(':
+            elif token == ")":
+                while operator_stack and operator_stack[-1] != "(":
                     output.append(operator_stack.pop())
                 if operator_stack:
                     operator_stack.pop()  # '(' 제거
             elif token in precedence:
-                while (operator_stack and
-                       operator_stack[-1] != '(' and
-                       operator_stack[-1] in precedence and
-                       precedence[operator_stack[-1]] >= precedence[token]):
+                while (
+                    operator_stack
+                    and operator_stack[-1] != "("
+                    and operator_stack[-1] in precedence
+                    and precedence[operator_stack[-1]] >= precedence[token]
+                ):
                     output.append(operator_stack.pop())
                 operator_stack.append(token)
 
@@ -252,23 +261,27 @@ class Calculator(QMainWindow):
         for token in postfix:
             if isinstance(token, (int, float)):
                 stack.append(token)
-            elif token in '+-*/':
+            elif token in "+-*/%":
                 if len(stack) < 2:
                     raise ValueError("잘못된 수식입니다")
 
                 b = stack.pop()
                 a = stack.pop()
 
-                if token == '+':
+                if token == "+":
                     result = a + b
-                elif token == '-':
+                elif token == "-":
                     result = a - b
-                elif token == '*':
+                elif token == "*":
                     result = a * b
-                elif token == '/':
+                elif token == "/":
                     if b == 0:
                         raise ZeroDivisionError("0으로 나눌 수 없습니다")
                     result = a / b
+                elif token == "%":
+                    if b == 0:
+                        raise ZeroDivisionError("0으로 나눌 수 없습니다")
+                    result = a % b
 
                 stack.append(result)
 
@@ -276,6 +289,11 @@ class Calculator(QMainWindow):
             raise ValueError("잘못된 수식입니다")
 
         return stack[0]
+
+    def is_percentage_operation(self, expression: str):
+        """백분율 연산인지 확인 (숫자% 패턴으로 끝나는 경우)"""
+        import re
+        return re.match(r'.*\d+%$', expression) is not None
 
     def safe_calculate(self, expression: str):
         """eval() 대신 안전한 수학식 계산"""
@@ -292,6 +310,7 @@ class Calculator(QMainWindow):
 
     def process(self):
         print(f"1process input if = {self.input}")
+        # 현재 input이 있으면 먼저 expression에 추가
         if self.input != "":
             print(f"process input if = {self.input}")
             if self.is_input_nagative:
@@ -300,20 +319,27 @@ class Calculator(QMainWindow):
             else:
                 self.expression.append(self.input)
             self.input = ""
+
+        # 모든 input이 포함된 완전한 expression 생성
         expression = "".join(x for x in self.expression)
         print(f"process = {expression}")
-        if expression.endswith("%"):
+
+        # 백분율 연산인지 확인 (숫자%로 끝나는 경우만)
+        if self.is_percentage_operation(expression):
             count = self.count_persent(expression)
             print(f"count = {count}")
             expression = expression[:-count] + f"/100{count * "0"}"
-            print(expression)
+            print(f"percentage conversion: {expression}")
+        # 나머지는 일반 계산으로 처리 (9%2 같은 경우)
         try:
-            answer = round(self.safe_calculate(expression), 6)
+            answer = self.safe_calculate(expression)
             print(f"answer = {answer}")
         except ZeroDivisionError:
             answer = 0
         self.expression.clear()
-        self.expression = [str(answer)]
+        # 스마트 포맷팅으로 부동소수점 정밀도 문제 해결
+        formatted_answer = f"{answer:.10g}"
+        self.expression = [formatted_answer]
         print(f"process expression = {self.expression} anser = {answer}")
 
     def is_last_operator(self):
@@ -358,7 +384,7 @@ class Calculator(QMainWindow):
 
     def reset(self):
         self.expression.clear()
-        self.input = "0"
+        self.input = ""
 
     def update_display(self):
         base = ""
@@ -369,7 +395,13 @@ class Calculator(QMainWindow):
         input_txt = self.input
         if self.is_input_nagative and self.input != "":
             input_txt = "(-" + self.input + ")"
-        self.display.setText(str(base + input_txt))
+
+        # 빈 입력일 때 "0" 표시
+        display_text = base + input_txt
+        if display_text == "":
+            display_text = "0"
+
+        self.display.setText(str(display_text))
 
     def negative_positive(self):
         self.is_input_nagative = not self.is_input_nagative
@@ -377,7 +409,10 @@ class Calculator(QMainWindow):
     def check_point(self):
         if "." in self.input:
             return
-        self.input = self.input + "."
+        if self.input == "" or self.input == "0":
+            self.input = "0."
+        else:
+            self.input = self.input + "."
 
     def delete_express(self):
         if self.input != "":
@@ -392,13 +427,14 @@ class Calculator(QMainWindow):
             self.delete_express()
         elif button_text.isdigit():
             print(f"input = {self.input}")
-            if self.input != "":
+            if self.input != "" and self.input != "0":
+                # 소수점이 있는 경우 float 변환하지 않고 직접 문자열 추가
                 if "." in self.input:
-                    self.input = str(float(self.input)) + button_text
+                    self.input = self.input + button_text
                 else:
                     self.input = str(int(self.input)) + button_text
             else:
-                self.input += button_text
+                self.input = button_text
         elif button_text == ".":
             self.check_point()
         elif button_text == "+/-":
