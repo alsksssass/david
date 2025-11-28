@@ -1,0 +1,53 @@
+parts,strength
+Concrete,36,79,72
+Steel,45,88,18
+Brick,71,55,92
+Wood,11,92,63
+Roofing,71,69,48
+Insulation,96,88,6
+Asphalt,81,77,32
+Plaster,37,54,59
+Insulation material,83,58,44
+Tile,100,77,14
+Aluminum,93,81,10
+Plywood,76,77,99
+PVC (Plastic),99,83,51
+Wire,48,51,87
+Fiberglass,31,82,98
+Adhesive,84,9,64
+Oil paint,92,9,56
+Iron railing,52,73,59
+Insulation crafts,50,36,99
+Scaffolding,92,3,63
+Ceiling molding mate,63,78,84
+Rebar tie,51,52,57
+Scale,43,83,29
+Window casing,18,79,84
+Ceiling panel,60,56,69
+Corner bead,22,58,85
+Rebar ceiling grid,59,88,86
+Door handle,67,82,11
+Plumbing,27,100,51
+Metal base,91,39,22
+Roof bumper,73,88,72
+Steel roof truss,76,98,12
+Meter box,91,97,51
+Roofing,39,87,42
+Control point,85,37,91
+Conduit box,73,14,69
+Building tag,61,43,77
+Vinyl flooring,30,43,82
+Rebar drawing,64,90,18
+Rebar installation,66,20,100
+Spray art,98,42,72
+Faucet,13,69,98
+Ironwork,85,86,83
+Scale,97,88,15
+Slab,91,90,62
+Cliff,58,75,100
+Curtain wall,57,91,33
+Roofing wave board,46,27,81
+Vinyl ceiling,99,81,90
+Sink,100,14,97
+Building frame,47,28,92
+Ladder rack,58,79,60
